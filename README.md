@@ -12,7 +12,7 @@ Koncierge enables developers to specify their high-level deployment requirements
 Your platform engineers can then optionally customize the _configuration generator_ or leave it with the best practice default options. 
 Koncierge then generates the YAML files that are needed to configure Kubernetes.
 
-At the same time you can optionally use [EnvisionIt](https://envisionit.app) to generate diagrams for you. 
+At the same time you can optionally use [EnvisionIt](https://envisionit.app){:target="_blank"} to generate diagrams for you. 
 This service is free for public models (if you don't mind anyone seeing your diagrams) or you can become a customer of EnvisionIt to keep them private.
 
 These diagrams enable the developers to confirm that they have expressed their requirements correctly. 
@@ -174,7 +174,7 @@ spec:
         - containerPort: 80
 ```
 
-See the full output here: [ExpectedOutput-DEV.yaml](examples%2Fexample2%2Fsrc%2Ftest%2Fresources%2FExpectedOutput-DEV.yaml)
+See the full output here: [ExpectedOutput-PROD.yaml](examples%2Fexample2%2Fsrc%2Ftest%2Fresources%2FExpectedOutput-PROD.yaml)
 
 ### Step 3: Confirm that the requirements have been specified correctly
 
