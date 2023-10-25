@@ -1,0 +1,280 @@
+<img src="images/koncierge-logo.svg" alt="Koncierge" style="float: right; margin-right: 10px; margin-left: 10px;  height: 150px" />
+
+# Prepare Kubernetes for a local developer environment on a Mac with Minikube
+
+[See other configuration options](prepare-k8s.md).
+
+## Step 1: Install Kubernetes
+
+### Step 1.1: Install Minikube
+
+Install and run Docker Desktop for Mac: https://docs.docker.com/desktop/install/mac-install/
+
+Follow the instructions at https://minikube.sigs.k8s.io/docs/start/
+
+```shell
+$ minikube start --driver=docker
+😄  minikube v1.31.2 on Darwin 13.4
+✨  Using the docker driver based on user configuration
+
+💣  Exiting due to PROVIDER_DOCKER_NOT_RUNNING: "docker version --format <no value>-<no value>:<no value>" exit status 1: Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?
+💡  Suggestion: Start the Docker service
+📘  Documentation: https://minikube.sigs.k8s.io/docs/drivers/docker/
+
+$ minikube start --driver=docker
+😄  minikube v1.31.2 on Darwin 13.4
+✨  Using the docker driver based on user configuration
+📌  Using Docker Desktop driver with root privileges
+👍  Starting control plane node minikube in cluster minikube
+🚜  Pulling base image ...
+💾  Downloading Kubernetes v1.27.4 preload ...
+    > preloaded-images-k8s-v18-v1...:  393.21 MiB / 393.21 MiB  100.00% 1.11 Mi
+    > gcr.io/k8s-minikube/kicbase...:  447.62 MiB / 447.62 MiB  100.00% 1.14 Mi
+🔥  Creating docker container (CPUs=2, Memory=4000MB) ...
+🐳  Preparing Kubernetes v1.27.4 on Docker 24.0.4 ...
+    ▪ Generating certificates and keys ...
+    ▪ Booting up control plane ...
+    ▪ Configuring RBAC rules ...
+🔗  Configuring bridge CNI (Container Networking Interface) ...
+🔎  Verifying Kubernetes components...
+    ▪ Using image gcr.io/k8s-minikube/storage-provisioner:v5
+🌟  Enabled addons: storage-provisioner, default-storageclass
+
+❗  /usr/local/bin/kubectl is version 1.25.4, which may have incompatibilities with Kubernetes 1.27.4.
+    ▪ Want kubectl v1.27.4? Try 'minikube kubectl -- get pods -A'
+🏄  Done! kubectl is now configured to use "minikube" cluster and "default" namespace by default
+```
+
+
+To confirm that it is working:
+
+```shell
+$ minikube version
+minikube version: v1.31.2
+commit: fd7ecd9c4599bef9f04c0986c4a0187f98a4396e
+```
+
+
+### Step 1.2: Stop Minikube when not needed
+
+On a local developer environment, you might not want to run it all the time. You can stop and start it as follows:
+
+```shell
+$ minikube pause
+⏸️  Pausing node minikube ... 
+⏯️  Paused 14 containers in: kube-system, kubernetes-dashboard, storage-gluster, istio-operator
+$ minikube unpause
+⏸️  Unpausing node minikube ... 
+⏸️  Unpaused 14 containers in: kube-system, kubernetes-dashboard, storage-gluster, istio-operator
+```
+
+## Step 2: Setup tools
+
+### Step 2.1: Setup kubectl
+
+Setup an alias so that the command "kubectl" executes "minikube kubectl".
+
+Make a backup of your `.bash_profile` file:
+
+```shell
+$ cp ~/.bash_profile ~/.bash_profile.bak
+$ nano ~/.bash_profile
+```
+
+Add this line at the end of the file:
+```shell
+alias kubectl="minikube kubectl --"
+```
+
+View the changes and make them active:
+
+```shell
+$ diff ~/.bash_profile.bak ~/.bash_profile
+35a36,37
+> 
+> alias kubectl="minikube kubectl --"
+$ source ~/.bash_profile
+```
+
+Confirm that it is working:
+
+```shell
+$ kubectl get nodes
+NAME       STATUS   ROLES           AGE   VERSION
+minikube   Ready    control-plane   84m   v1.27.4
+$ kubectl config view
+apiVersion: v1
+clusters:
+- cluster:
+    certificate-authority-data: DATA+OMITTED
+    server: https://192.168.191.5:16443
+  name: microk8s-cluster
+- cluster:
+...
+    extensions:
+...
+    server: https://127.0.0.1:52943
+  name: minikube
+contexts:
+- context:
+    cluster: microk8s-cluster
+    user: admin
+  name: microk8s
+- context:
+    cluster: minikube
+    extensions:
+...
+    namespace: default
+    user: minikube
+  name: minikube
+current-context: minikube
+kind: Config
+preferences: {}
+users:
+- name: admin
+  user:
+    token: REDACTED
+- name: minikube
+...
+```
+
+### Step 2.2: Setup k9s
+
+Follow the instructions at https://k9scli.io/topics/install/
+
+Start **k9s**:
+
+```shell
+$ k9s
+```
+
+You should see something like this:
+
+![k9s_showing_minikube.png](images%2Fk9s_showing_minikube.png)
+
+
+## Steps 3: Setup and test domain names
+
+You need to set up DNS so that the domain name of each of our environments points to the Kubernetes cluster where that environment is deployed.
+
+For example, in [Example 2](..%2Fexamples%2Fexample2%2FREADME.md), the production environment is deployed to _example.com_.
+In this case the domain _example.com_ will point to the _frontend_ service and _api.example.com_ will point to the _backend_ service.
+It is the [ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/) that is generated by Koncierge that handles the sub-domain,
+but the main domain must be set up to point to the cluster where the production environment is deployed.
+
+If you want to test on your local environment, you can set up a _test_ domain on your laptop that points to your local cluster.
+The [ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/) that is generated will then point _todo.test_ to the
+_frontend_ service and _api.todo.test_ to the _backend_ service.
+
+Follow the instructions at https://minikube.sigs.k8s.io/docs/handbook/addons/ingress-dns/
+
+See https://kubernetes.io/docs/tasks/access-application-cluster/ingress-minikube/
+
+### Step 3.1: Enable required addons in Minikube
+
+```shell
+$ minikube addons enable ingress
+💡  ingress is an addon maintained by Kubernetes. For any concerns contact minikube on GitHub.
+You can view the list of minikube maintainers at: https://github.com/kubernetes/minikube/blob/master/OWNERS
+💡  After the addon is enabled, please run "minikube tunnel" and your ingress resources would be available at "127.0.0.1"
+    ▪ Using image registry.k8s.io/ingress-nginx/controller:v1.8.1
+    ▪ Using image registry.k8s.io/ingress-nginx/kube-webhook-certgen:v20230407
+    ▪ Using image registry.k8s.io/ingress-nginx/kube-webhook-certgen:v20230407
+🔎  Verifying ingress addon...
+🌟  The 'ingress' addon is enabled
+$ minikube addons enable ingress-dns
+💡  ingress-dns is an addon maintained by minikube. For any concerns contact minikube on GitHub.
+You can view the list of minikube maintainers at: https://github.com/kubernetes/minikube/blob/master/OWNERS
+💡  After the addon is enabled, please run "minikube tunnel" and your ingress resources would be available at "127.0.0.1"
+    ▪ Using image gcr.io/k8s-minikube/minikube-ingress-dns:0.0.2
+🌟  The 'ingress-dns' addon is enabled
+```
+
+### Step 3.2: Setup DNS
+
+There are no specific instructions on how to do this for Microk8s, so follow the instructions for step 3 at https://minikube.sigs.k8s.io/docs/handbook/addons/ingress-dns/.
+Use the InternalIP that you found above where the instructions refer to "minikube ip".
+
+Add the domains you want to use to your /etc/hosts:
+
+```shell
+$ sudo nano /etc/hosts
+Password:
+$ tail -n2 /etc/hosts
+127.0.0.1	test
+127.0.0.1	hello-john.test
+
+```
+
+### Step 3.3: Test DNS
+
+//TODO Provide url for the file
+
+```shell
+$ ls
+ingress-test.yaml
+$ kubectl create namespace ingress-test
+namespace/ingress-test created
+$ kubectl apply -f ingress-test.yaml 
+deployment.apps/hello-world-app created
+ingress.networking.k8s.io/example-ingress created
+service/hello-world-app created
+service/hello-world-app configured
+$ k9s
+```
+
+Start the tunnel:
+
+```shell
+$ minikube tunnel
+✅  Tunnel successfully started
+
+📌  NOTE: Please do not close this terminal as this process must stay alive for the tunnel to be accessible ...
+
+❗  The service/ingress example-ingress requires privileged ports to be exposed: [80 443]
+🔑  sudo permission will be asked for it.
+🏃  Starting tunnel for service example-ingress.
+Password:
+```
+
+Keep the terminal with the tunnel open and test it in a new terminal:
+
+```shell
+$ curl http://hello-john.test
+Hello, world!
+Version: 1.0.0
+Hostname: hello-world-app-65bdb79f98-vs9dz
+
+```
+
+Clean up:
+
+```shell
+$ kubectl delete namespace ingress-test
+namespace "ingress-test" deleted
+```
+
+## Troubleshooting
+
+### URL returning 404
+
+If you get this:
+
+```shell
+$ curl http://todo.test
+{"timestamp":1697956922103,"status":404,"error":"Not Found","message":"No message available","path":"/"} 
+```
+
+Then do the following:
+1. Uninstall Minikube
+    ```shell
+    $ minikube stop
+    ✋  Stopping node "minikube"  ...
+    🛑  Powering off "minikube" via SSH ...
+    🛑  1 node stopped.
+    $ brew uninstall minikube
+    Uninstalling /usr/local/Cellar/minikube/1.31.2... (9 files, 83MB)
+    ```
+2. Delete the namespace you have deployed, e.g. `kubectl delete namespace to-do`
+3. Use `:pv` and `:pvc` in K9s to see if there are persistent volumes and persistent volume claims that were not deleted and delete them manually.
+3. Start again from the top

@@ -1,0 +1,281 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  namespace: to-do
+  name: backend
+data:
+  DB_USERNAME: dXNlcg==
+  DB_PASSWORD: ZGV2ZWxvcA==
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: to-do
+  name: backend
+data:
+  DB_HOST: database
+  DB_NAME: todo
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: to-do
+  name: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: to-do
+      component: backend
+  template:
+    metadata:
+      labels:
+        app: to-do
+        component: backend
+    spec:
+      containers:
+      - name: backend
+        image: kubernetesdemo/to-do-app-backend
+        env:
+        - name: DB_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: backend
+              key: DB_USERNAME
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: backend
+              key: DB_PASSWORD
+        - name: DB_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: backend
+              key: DB_HOST
+        - name: DB_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: backend
+              key: DB_NAME
+        ports:
+        - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: to-do
+  name: backend
+spec:
+  selector:
+    app: to-do
+    component: backend
+  ports:
+  - port: 80
+    targetPort: 8080
+    protocol: TCP
+  type: LoadBalancer
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: to-do
+  name: frontend
+data:
+  SERVER_URI: api.todo.test
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: to-do
+  name: frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: to-do
+      component: frontend
+  template:
+    metadata:
+      labels:
+        app: to-do
+        component: frontend
+    spec:
+      containers:
+      - name: frontend
+        image: kubernetesdemo/to-do-app-frontend
+        env:
+        - name: SERVER_URI
+          valueFrom:
+            configMapKeyRef:
+              name: frontend
+              key: SERVER_URI
+        ports:
+        - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: to-do
+  name: frontend
+spec:
+  selector:
+    app: to-do
+    component: frontend
+  ports:
+  - port: 80
+    targetPort: 8080
+    protocol: TCP
+  type: LoadBalancer
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  namespace: to-do
+  name: database
+data:
+  MYSQL_ROOT_PASSWORD: bWFnaWM=
+  MYSQL_USER: dXNlcg==
+  MYSQL_PASSWORD: ZGV2ZWxvcA==
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: to-do
+  name: database
+data:
+  MYSQL_DATABASE: todo
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: to-do
+  name: database
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: to-do
+      component: database
+  template:
+    metadata:
+      labels:
+        app: to-do
+        component: database
+    spec:
+      containers:
+      - name: database
+        image: mysql:5.7
+        args:
+        - --ignore-db-dir=lost+found
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: database
+              key: MYSQL_ROOT_PASSWORD
+        - name: MYSQL_USER
+          valueFrom:
+            secretKeyRef:
+              name: database
+              key: MYSQL_USER
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: database
+              key: MYSQL_PASSWORD
+        - name: MYSQL_DATABASE
+          valueFrom:
+            configMapKeyRef:
+              name: database
+              key: MYSQL_DATABASE
+        volumeMounts:
+        - name: database
+          mountPath: /var/lib/mysql
+        ports:
+        - containerPort: 3306
+      volumes:
+      - name: database
+        persistentVolumeClaim:
+          claimName: database-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: to-do
+  name: database
+spec:
+  selector:
+    app: to-do
+    component: database
+  ports:
+  - port: 3306
+    targetPort: 3306
+    protocol: TCP
+  type: ClusterIP
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  namespace: to-do
+  name: database-pv
+spec:
+  storageClassName: to-do-data
+  capacity:
+    storage: 1Gi
+  accessModes:
+  - ReadWriteOnce
+  hostPath:
+    path: /data/k8s-storage/database
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  namespace: to-do
+  name: database-pvc
+spec:
+  storageClassName: to-do-data
+  volumeName: database-pv
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  namespace: to-do
+  name: to-do-data
+provisioner: microk8s.io/hostpath
+reclaimPolicy: Delete
+parameters:
+  pvDir: /data/k8s-storage
+volumeBindingMode: WaitForFirstConsumer
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  namespace: to-do
+  name: to-do
+spec:
+  rules:
+  - host: todo.test
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: frontend
+            port:
+              number: 80
+  - host: api.todo.test
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: backend
+            port:
+              number: 80
