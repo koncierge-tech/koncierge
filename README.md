@@ -12,7 +12,7 @@ Koncierge enables developers to specify their high-level deployment requirements
 Your platform engineers can then optionally customize the _configuration generator_ or leave it with the best practice default options. 
 Koncierge then generates the YAML files that are needed to configure Kubernetes.
 
-At the same time you can optionally use [EnvisionIt](https://envisionit.app) to generate diagrams for you. 
+At the same time you can optionally use [EnvisionIt](https://envisionit.app/kubernetes) to generate diagrams for you. 
 This service is free for public models (if you don't mind anyone seeing your diagrams) or you can become a customer of EnvisionIt to keep them private.
 
 These diagrams enable the developers to confirm that they have expressed their requirements correctly. 
@@ -100,6 +100,8 @@ Route backendRoute = new SubDomainRoute(application, backendPort, "api");
 backendRoute.getDomainName().assignTo(serverUriVariable);
 ```
 
+See the full class here: [ToDoExample.java](examples%2Fexample2%2Fsrc%2Fmain%2Fjava%2Ftech%2Fkoncierge%2Fexamples%2Fexample2%2FToDoExample.java)
+
 ### Step 2: Run the configuration generator
 ```java
 public static void main(String[] args) {
@@ -116,7 +118,7 @@ public static void main(String[] args) {
 }
 ```
 
-It produces the YAML files you need for Kubernetes
+It produces the YAML files you need for Kubernetes.
 
 For example:
 ```yaml
@@ -172,6 +174,7 @@ spec:
                   key: DB_NAME
           ports:
             - containerPort: 8080
+...
 ```
 
 See the full output here: [ExpectedOutput-PROD.yaml](examples%2Fexample2%2Fsrc%2Ftest%2Fresources%2FExpectedOutput-PROD.yaml)
@@ -208,5 +211,6 @@ See [How to deploy](docs%2Fdeploy.md).
 ### Next steps for platform engineers
 
 1. Study the [ConfigurationGenerator.java](core%2Fsrc%2Fmain%2Fjava%2Ftech%2Fkoncierge%2Fgenerator%2FConfigurationGenerator.java).
+2. See our [roadmap](docs%2Froadmap.md) for what is coming. 
 2. [Contribute](CONTRIBUTING.md) if you think of improvements. 
 
