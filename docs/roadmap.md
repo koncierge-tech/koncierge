@@ -28,7 +28,7 @@ security and only allow network connections that are necessary.
 
 ## Continuous delivery integration
 
-Koncierge will generate the YAML files in a format and structure compatible with FluxCD, ArgoCD, etc.
+Koncierge will generate the YAML files in a format and structure compatible with [FluxCD](https://fluxcd.io), [ArgoCD](https://argoproj.github.io/cd/), etc.
 
 This means you can integrate Koncierge in your deployment pipeline so that when a change to the Deployment Requirements
 code is committed, it kickstarts a process that ends with the changes deployed to Kubernetes.

@@ -4,7 +4,7 @@
 
 This project is sponsored by [EnvisionIt](https://envisionit.app/). 
 
-It is provided in an open core model - a mixture of open source and closed source software.
+It is provided in an _open core_ model - a mixture of open source and closed source software.
 
 The open source part is the _configuration generator_ called Koncierge and is distributed with an Apache 2.0 license.
 
