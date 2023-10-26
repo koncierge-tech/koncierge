@@ -33,10 +33,11 @@ You should see something like this in the output:
 [INFO] ------------------------------------------------------------------------
 [INFO] Reactor Summary:
 [INFO] 
-[INFO] koncierge-core 0.0.1-SNAPSHOT ...................... SUCCESS [  1.994 s]
-[INFO] koncierge-example1 0.1.0-SNAPSHOT .................. SUCCESS [  0.685 s]
-[INFO] koncierge-example2 0.0.1-SNAPSHOT .................. SUCCESS [  0.704 s]
-[INFO] koncierge 0.0.1-SNAPSHOT ........................... SUCCESS [  0.006 s]
+[INFO] Diagram Generator API 0.0.1-SNAPSHOT ............... SUCCESS [  1.992 s]
+[INFO] koncierge-core 0.0.1-SNAPSHOT ...................... SUCCESS [  3.563 s]
+[INFO] koncierge-example1 0.1.0-SNAPSHOT .................. SUCCESS [  0.616 s]
+[INFO] koncierge-example2 0.0.1-SNAPSHOT .................. SUCCESS [  1.252 s]
+[INFO] koncierge 0.0.1-SNAPSHOT ........................... SUCCESS [  0.007 s]
 [INFO] ------------------------------------------------------------------------
 [INFO] BUILD SUCCESS
 [INFO] ------------------------------------------------------------------------
