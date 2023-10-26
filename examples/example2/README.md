@@ -16,8 +16,10 @@ Something important to note in the source code is the environment variables that
 with values when it is deployed:
 - Backend:
   - https://github.com/shri-kanth/kubernetes-demo-backend/blob/master/src/main/resources/application.yml
+  - Requires DB_USERNAME, DB_PASSWORD, DB_HOST and DB_NAME.
 - Frontend: 
   - https://github.com/shri-kanth/kubernetes-demo-frontend/blob/master/initialize.js
+  - Requires SERVER_URI.
 
 ## How to run it
 
