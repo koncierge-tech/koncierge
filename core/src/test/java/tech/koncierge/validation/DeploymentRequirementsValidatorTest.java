@@ -23,6 +23,7 @@ import tech.koncierge.model.deployment.requirements.Database;
 import tech.koncierge.model.deployment.requirements.DeploymentRequirements;
 import tech.koncierge.model.deployment.requirements.Environment;
 import tech.koncierge.model.deployment.requirements.Variable;
+import tech.koncierge.model.deployment.requirements.values.ConstantValue;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -111,6 +112,30 @@ public class DeploymentRequirementsValidatorTest {
         assertEquals(1, validationException.getViolations().size());
 
         assertContainsConstraintViolation(validationException, "applications[0].components[0].databaseType", "must not be empty");
+    }
+
+    @Test
+    public void testValid() {
+        DeploymentRequirements deploymentRequirements = new DeploymentRequirements();
+
+        Application application = new Application(deploymentRequirements);
+        application.setLongName("My First Application");
+        application.setShortName("My First");
+
+        ApplicationEnvironment localApplicationEnvironment = new ApplicationEnvironment(application, Environment.LOCAL, "myfirst.test");
+
+        Component component = new Component(application);
+        component.setName("My First Component");
+
+        Variable variable = new Variable(component, "MY_VARIABLE");
+        variable.setValue(new ConstantValue(application, "My First Value"));
+
+        Database database = new Database(application);
+        database.setName("My First Database");
+        database.setDatabaseType("mysql");
+
+        DeploymentRequirementsValidator validator = new DeploymentRequirementsValidator(deploymentRequirements);
+        validator.validate();
     }
 
     private ValidationException assertThrowsValidationException(DeploymentRequirements deploymentRequirements) {
