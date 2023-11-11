@@ -16,10 +16,12 @@ limitations under the License.
 package tech.koncierge.k8s.parser;
 
 import org.junit.jupiter.api.Test;
+import tech.koncierge.generator.kubernetes.util.YamlUtil;
 import tech.koncierge.model.kubernetes.Specification;
 
 import java.io.InputStream;
 import java.util.List;
+import java.util.Scanner;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -38,5 +40,13 @@ public class KubernetesManifestParserTest {
 
         Specification specification2 = specifications.get(1);
         assertEquals("io.k8s.api.core.v1.Service", specification2.getSchemaId());
+
+        String renderedYaml = YamlUtil.generateK8sYaml(specifications);
+        assertEquals(readFileAsString("kubernetes/example-manifest.yaml"), renderedYaml);
+    }
+
+    private String readFileAsString(String fileName) {
+        String text = new Scanner(getClass().getClassLoader().getResourceAsStream(fileName), "UTF-8").useDelimiter("\\A").next();
+        return text;
     }
 }

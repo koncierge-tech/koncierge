@@ -22,6 +22,7 @@ import tech.koncierge.k8s.grammar.KubernetesOpenApi;
 import tech.koncierge.model.kubernetes.PropertyValueList;
 import tech.koncierge.model.kubernetes.SimpleValue;
 import tech.koncierge.model.kubernetes.Specification;
+import tech.koncierge.model.kubernetes.simple.IntValue;
 import tech.koncierge.model.kubernetes.simple.StringValue;
 
 import java.io.InputStream;
@@ -74,8 +75,13 @@ public class KubernetesManifestParser {
                 parseProperties(propertySpecification, valueMap);
             }
         } else {
-            SimpleValue simpleValue = new StringValue(value == null? null : value.toString());
-            specification.getProperties().put(key, simpleValue);
+            if (value != null && value instanceof Integer) {
+                SimpleValue simpleValue = new IntValue((Integer) value);
+                specification.getProperties().put(key, simpleValue);
+            } else {
+                SimpleValue simpleValue = new StringValue(value == null? null : value.toString());
+                specification.getProperties().put(key, simpleValue);
+            }
         }
     }
 
