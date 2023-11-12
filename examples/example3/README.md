@@ -19,7 +19,31 @@ in this example we use existing hand-coded manifests and generate diagrams for t
    generate.diagrams.api.key=<your-api-key>
    ```
 2. Run the **main()** method.
-   1. In IntelliJ, right-click on `src/main/java/tech/koncierge/examples/example3/VisualizeExistingManifestsExample.java` and select **Run 'VisualizeExistingManifestsExample.main()'**
+
+   In IntelliJ, right-click on `src/main/java/tech/koncierge/examples/example3/VisualizeExistingManifestsExample.java` and select **Run 'VisualizeExistingManifestsExample.main()'**
+
+   This is what it does:
+   
+      ```java
+       // For example, clone the code from https://github.com/Microservice-API-Patterns/LakesideMutual and provide the path to the manifests directory here:
+       public static final String MANIFESTS_PATH = "/Users/evert/data/projects/LakesideMutual/kubernetes/manifests";
+   
+       public static void main(String[] args) {
+           String workingDirectory = WorkingDirectoryUtil.getWorkingDirectory(VisualizeExistingManifestsExample.class);
+           Config config = new Config(workingDirectory);
+   
+           List<File> files = KubernetesManifestFileUtil.getManifestFiles(MANIFESTS_PATH);
+           KubernetesManifestParser parser = new KubernetesManifestParser();
+           List<Manifest> manifests = parser.parseSpecifications(files);
+   
+           KubernetesConfiguration kubernetesConfiguration = new KubernetesConfiguration();
+           ClusterConfiguration clusterConfiguration = new ClusterConfiguration("PROD");
+           kubernetesConfiguration.getClusterConfigurations().add(clusterConfiguration);
+           clusterConfiguration.setManifests(manifests);
+   
+           DiagramGenerator.generateKubernetesConfigurationDiagrams(config, kubernetesConfiguration);
+       }
+      ```
 
 ### Step 2: View the diagram
 

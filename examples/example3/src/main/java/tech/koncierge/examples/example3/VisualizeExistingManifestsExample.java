@@ -14,7 +14,7 @@ import java.util.List;
 
 public class VisualizeExistingManifestsExample {
 
-    // For example, check out the code from https://github.com/Microservice-API-Patterns/LakesideMutual and provide the path to the manifests directory here:
+    // For example, clone the code from https://github.com/Microservice-API-Patterns/LakesideMutual and provide the path to the manifests directory here:
     public static final String MANIFESTS_PATH = "/Users/evert/data/projects/LakesideMutual/kubernetes/manifests";
 
     public static void main(String[] args) {

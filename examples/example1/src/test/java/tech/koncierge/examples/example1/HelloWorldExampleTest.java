@@ -38,7 +38,7 @@ public class HelloWorldExampleTest {
         Map<Environment, ClusterConfiguration> clusterConfigurationMap = kubernetesGenerator.generateClusterConfigurations();
         List<ClusterConfiguration> clusterConfigurations = kubernetesGenerator.collectAndNameClusterConfigurations(clusterConfigurationMap);
         ClusterConfiguration clusterConfiguration = clusterConfigurations.get(0);
-        String yaml = YamlUtil.generateK8sYaml(clusterConfiguration.getSpecifications());
+        String yaml = YamlUtil.generateK8sYaml(clusterConfiguration.getManifests());
 
         assertEquals(readFileAsString("/ExpectedOutput-DEV.yaml"), yaml);
     }
