@@ -12,6 +12,7 @@
         <module>core</module>
         <module>examples/example1</module>
         <module>examples/example2</module>
+        <module>examples/example3</module>
     </modules>
 
 </project>

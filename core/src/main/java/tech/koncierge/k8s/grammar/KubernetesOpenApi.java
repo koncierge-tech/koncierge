@@ -31,7 +31,7 @@ public class KubernetesOpenApi {
 
     private static OpenAPI parse() {
         OpenAPIV3Parser parser = new OpenAPIV3Parser();
-        OpenAPI openAPI = parser.read("./src/main/resources/kubernetes/k8s-swagger.json");
+        OpenAPI openAPI = parser.read("/kubernetes/k8s-swagger.json");
         return openAPI;
     }
 

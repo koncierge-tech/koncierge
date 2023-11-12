@@ -19,12 +19,14 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.Schema;
 import org.yaml.snakeyaml.Yaml;
 import tech.koncierge.k8s.grammar.KubernetesOpenApi;
+import tech.koncierge.model.kubernetes.Manifest;
 import tech.koncierge.model.kubernetes.PropertyValueList;
 import tech.koncierge.model.kubernetes.SimpleValue;
 import tech.koncierge.model.kubernetes.Specification;
 import tech.koncierge.model.kubernetes.simple.IntValue;
 import tech.koncierge.model.kubernetes.simple.StringValue;
 
+import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,23 +34,33 @@ import java.util.Map;
 
 public class KubernetesManifestParser {
 
-    public List<Specification> parseSpecification(InputStream inputStream) {
-        List<Specification> specifications = new ArrayList<>();
+    public List<Manifest> parseSpecifications(List<File> files) {
+        List<Manifest> manifests = new ArrayList<>();
+        for (File file : files) {
+            try {
+                InputStream inputStream = file.toURI().toURL().openStream();
+                manifests.addAll(parseSpecification(inputStream));
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return manifests;
+    }
+
+    public List<Manifest> parseSpecification(InputStream inputStream) {
+        List<Manifest> manifests = new ArrayList<>();
         List<Map<String, Object>> yamlMaps = readYamlFile(inputStream);
         for (Map<String, Object> yamlMap : yamlMaps) {
-            Specification specification = new Specification(getTopLevelSchemaId(yamlMap));
+            Manifest specification = new Manifest(getTopLevelSchemaId(yamlMap));
             parseProperties(specification, yamlMap);
-            specifications.add(specification);
+            manifests.add(specification);
         }
 
-        return specifications;
+        return manifests;
     }
 
     private void parseProperties(Specification specification, Map<String, Object> yamlMap) {
         for (String key : yamlMap.keySet()) {
-            if ("containers".equals(key)) {
-                System.out.println("containers");
-            }
             Object value = yamlMap.get(key);
             processValue(specification, key, value);
         }
@@ -60,7 +72,6 @@ public class KubernetesManifestParser {
             Map<String, Object> valueMap = (Map<String, Object>) value;
             Specification propertySpecification = new Specification(getSchemaId(specificationSchema, key));
             specification.getProperties().put(key, propertySpecification);
-            System.out.println(valueMap);
             parseProperties(propertySpecification, valueMap);
         } else if (value instanceof List) {
             List<Object> valueList = (List<Object>) value;

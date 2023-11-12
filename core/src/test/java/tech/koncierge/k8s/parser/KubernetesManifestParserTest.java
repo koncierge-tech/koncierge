@@ -17,6 +17,7 @@ package tech.koncierge.k8s.parser;
 
 import org.junit.jupiter.api.Test;
 import tech.koncierge.generator.kubernetes.util.YamlUtil;
+import tech.koncierge.model.kubernetes.Manifest;
 import tech.koncierge.model.kubernetes.Specification;
 
 import java.io.InputStream;
@@ -32,16 +33,16 @@ public class KubernetesManifestParserTest {
         InputStream inputStream = this.getClass()
                 .getClassLoader()
                 .getResourceAsStream("kubernetes/example-manifest.yaml");
-        List<Specification> specifications = new KubernetesManifestParser().parseSpecification(inputStream);
-        assertEquals(2, specifications.size());
+        List<Manifest> manifests = new KubernetesManifestParser().parseSpecification(inputStream);
+        assertEquals(2, manifests.size());
 
-        Specification specification1 = specifications.get(0);
+        Specification specification1 = manifests.get(0);
         assertEquals("io.k8s.api.apps.v1.Deployment", specification1.getSchemaId());
 
-        Specification specification2 = specifications.get(1);
+        Specification specification2 = manifests.get(1);
         assertEquals("io.k8s.api.core.v1.Service", specification2.getSchemaId());
 
-        String renderedYaml = YamlUtil.generateK8sYaml(specifications);
+        String renderedYaml = YamlUtil.generateK8sYaml(manifests);
         assertEquals(readFileAsString("kubernetes/example-manifest.yaml"), renderedYaml);
     }
 
